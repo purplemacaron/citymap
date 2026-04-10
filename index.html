@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>City Map</title>
+<style>
+  html, body { margin:0; overflow:hidden; background:#fff; }
+  svg { width:100vw; height:100vh; cursor:grab; touch-action:none; }
+</style>
+</head>
+<body>
+
+<svg id="map" viewBox="-3200 -3200 6400 6400">
+  <g id="viewport">
+
+    <!-- 외곽 -->
+    <circle cx="0" cy="0" r="3100" stroke="black" stroke-width="30" fill="none"/>
+
+    <!-- 링 -->
+    <circle cx="0" cy="0" r="2800" stroke="black" stroke-width="20" fill="none"/>
+    <circle cx="0" cy="0" r="2000" stroke="black" stroke-width="20" fill="none"/>
+    <circle cx="0" cy="0" r="1000" stroke="black" stroke-width="20" fill="none"/>
+
+    <!-- 방사 -->
+    <g stroke="black" stroke-width="15">
+      <script><![CDATA[
+        const g = document.currentScript.parentNode;
+        for(let i=0;i<16;i++){
+          const angle = i * Math.PI*2/16;
+          const x = Math.cos(angle)*3100;
+          const y = Math.sin(angle)*3100;
+          const line = document.createElementNS("http://www.w3.org/2000/svg","line");
+          line.setAttribute("x1",0);
+          line.setAttribute("y1",0);
+          line.setAttribute("x2",x);
+          line.setAttribute("y2",y);
+          g.appendChild(line);
+        }
+      ]]></script>
+    </g>
+
+    <!-- 격자 -->
+    <g stroke="black" stroke-width="5">
+      <script><![CDATA[
+        const grid = document.currentScript.parentNode;
+        const step = 200; // 200m 격자
+        for(let x=-3200;x<=3200;x+=step){
+          const l = document.createElementNS("http://www.w3.org/2000/svg","line");
+          l.setAttribute("x1",x);
+          l.setAttribute("y1",-3200);
+          l.setAttribute("x2",x);
+          l.setAttribute("y2",3200);
+          grid.appendChild(l);
+        }
+        for(let y=-3200;y<=3200;y+=step){
+          const l = document.createElementNS("http://www.w3.org/2000/svg","line");
+          l.setAttribute("x1",-3200);
+          l.setAttribute("y1",y);
+          l.setAttribute("x2",3200);
+          l.setAttribute("y2",y);
+          grid.appendChild(l);
+        }
+      ]]></script>
+    </g>
+
+  </g>
+</svg>
+
+<script>
+const svg = document.getElementById("map");
+const vp = document.getElementById("viewport");
+
+let scale = 1;
+let origin = {x:0, y:0};
+let isDragging = false;
+let start = {x:0,y:0};
+
+// 마우스 줌
+svg.addEventListener("wheel", e=>{
+  e.preventDefault();
+  const zoom = e.deltaY < 0 ? 1.1 : 0.9;
+  scale *= zoom;
+  vp.setAttribute("transform", `translate(${origin.x},${origin.y}) scale(${scale})`);
+});
+
+// 마우스 드래그
+svg.addEventListener("mousedown", e=>{
+  isDragging = true;
+  start = {x:e.clientX, y:e.clientY};
+  svg.style.cursor = "grabbing";
+});
+
+svg.addEventListener("mouseup", ()=>{
+  isDragging = false;
+  svg.style.cursor = "grab";
+});
+
+svg.addEventListener("mousemove", e=>{
+  if(!isDragging) return;
+  origin.x += (e.clientX - start.x)/scale;
+  origin.y += (e.clientY - start.y)/scale;
+  start = {x:e.clientX, y:e.clientY};
+  vp.setAttribute("transform", `translate(${origin.x},${origin.y}) scale(${scale})`);
+});
+
+// 터치 드래그 (손가락)
+let touchStart = {x:0, y:0};
+
+svg.addEventListener("touchstart", e=>{
+  isDragging = true;
+  touchStart = {
+    x: e.touches[0].clientX,
+    y: e.touches[0].clientY
+  };
+});
+
+svg.addEventListener("touchend", ()=>{
+  isDragging = false;
+});
+
+svg.addEventListener("touchmove", e=>{
+  if(!isDragging) return;
+
+  const touch = e.touches[0];
+
+  origin.x += (touch.clientX - touchStart.x)/scale;
+  origin.y += (touch.clientY - touchStart.y)/scale;
+
+  touchStart = {
+    x: touch.clientX,
+    y: touch.clientY
+  };
+
+  vp.setAttribute("transform",
+    `translate(${origin.x},${origin.y}) scale(${scale})`
+  );
+});
+</script>
+
+</body>
+</html>
