@@ -11,86 +11,133 @@ svg{width:100vw;height:100vh;touch-action:none;}
 
 <svg id="map" viewBox="-3200 -3200 6400 6400">
 
-  <!-- 정확한 30km² 반지름 = 3089m -->
-  <defs>
-    <clipPath id="clipCircle">
-      <circle cx="0" cy="0" r="3089"/>
-    </clipPath>
-  </defs>
+<defs>
+  <!-- 30km² 원 -->
+  <clipPath id="clipCircle">
+    <circle cx="0" cy="0" r="3089"/>
+  </clipPath>
 
-  <g id="viewport">
+  <!-- 항만 구역 (1번 / 9번) -->
+  <clipPath id="port1">
+    <path d="
+      M 0 0
+      L 3089 0
+      A 3089 3089 0 0 1 2855 1180
+      Z"/>
+  </clipPath>
 
-    <!-- 격자 (원 내부만) -->
-    <g clip-path="url(#clipCircle)" stroke="black" stroke-width="4">
-      <script><![CDATA[
-        const grid = document.currentScript.parentNode;
-        const step = 200; // 200m 격자
+  <clipPath id="port9">
+    <path d="
+      M 0 0
+      L -3089 0
+      A 3089 3089 0 0 1 -2855 -1180
+      Z"/>
+  </clipPath>
+</defs>
 
-        for(let x=-3200;x<=3200;x+=step){
-          const l=document.createElementNS("http://www.w3.org/2000/svg","line");
-          l.setAttribute("x1",x);
-          l.setAttribute("y1",-3200);
-          l.setAttribute("x2",x);
-          l.setAttribute("y2",3200);
-          grid.appendChild(l);
+<g id="viewport">
+
+  <!-- 격자 (쐐기 제거) -->
+  <g clip-path="url(#clipCircle)" stroke="black" stroke-width="4">
+    <script><![CDATA[
+      const grid = document.currentScript.parentNode;
+      const step = 200;
+      const minSize = 120;
+
+      for(let x=-3200;x<3200;x+=step){
+        for(let y=-3200;y<3200;y+=step){
+
+          const cx = x + step/2;
+          const cy = y + step/2;
+          const dist = Math.sqrt(cx*cx + cy*cy);
+
+          if(dist > 3089) continue;
+          if((3089 - dist) < minSize) continue;
+
+          let v = document.createElementNS("http://www.w3.org/2000/svg","line");
+          v.setAttribute("x1",x);
+          v.setAttribute("y1",y);
+          v.setAttribute("x2",x);
+          v.setAttribute("y2",y+step);
+          grid.appendChild(v);
+
+          let h = document.createElementNS("http://www.w3.org/2000/svg","line");
+          h.setAttribute("x1",x);
+          h.setAttribute("y1",y);
+          h.setAttribute("x2",x+step);
+          h.setAttribute("y2",y);
+          grid.appendChild(h);
         }
+      }
+    ]]></script>
+  </g>
 
-        for(let y=-3200;y<=3200;y+=step){
-          const l=document.createElementNS("http://www.w3.org/2000/svg","line");
-          l.setAttribute("x1",-3200);
-          l.setAttribute("y1",y);
-          l.setAttribute("x2",3200);
-          l.setAttribute("y2",y);
-          grid.appendChild(l);
-        }
-      ]]></script>
+  <!-- 항만시설 (격자 위에 덮음) -->
+  <g stroke="black" stroke-width="6">
+
+    <!-- 1번 구역 -->
+    <g clip-path="url(#port1)">
+      <rect x="0" y="-400" width="3089" height="800" fill="none"/>
+      <line x1="500" y1="-600" x2="500" y2="600"/>
+      <line x1="900" y1="-600" x2="900" y2="600"/>
+      <line x1="1300" y1="-600" x2="1300" y2="600"/>
+      <line x1="1700" y1="-600" x2="1700" y2="600"/>
+      <line x1="2100" y1="-600" x2="2100" y2="600"/>
+      <line x1="2500" y1="-600" x2="2500" y2="600"/>
     </g>
 
-    <!-- 링 도로 -->
-    <circle cx="0" cy="0" r="1000" stroke="black" stroke-width="18" fill="none"/>
-    <circle cx="0" cy="0" r="2000" stroke="black" stroke-width="18" fill="none"/>
-    <circle cx="0" cy="0" r="2800" stroke="black" stroke-width="18" fill="none"/>
-
-    <!-- 외곽 -->
-    <circle cx="0" cy="0" r="3089" stroke="black" stroke-width="28" fill="none"/>
-
-    <!-- 방사 도로 (16개) -->
-    <g stroke="black" stroke-width="12">
-      <script><![CDATA[
-        const g=document.currentScript.parentNode;
-        for(let i=0;i<16;i++){
-          const a=i*Math.PI*2/16;
-          const x=Math.cos(a)*3089;
-          const y=Math.sin(a)*3089;
-
-          const line=document.createElementNS("http://www.w3.org/2000/svg","line");
-          line.setAttribute("x1",0);
-          line.setAttribute("y1",0);
-          line.setAttribute("x2",x);
-          line.setAttribute("y2",y);
-
-          g.appendChild(line);
-        }
-      ]]></script>
+    <!-- 9번 구역 -->
+    <g clip-path="url(#port9)">
+      <rect x="-3089" y="-400" width="3089" height="800" fill="none"/>
+      <line x1="-500" y1="-600" x2="-500" y2="600"/>
+      <line x1="-900" y1="-600" x2="-900" y2="600"/>
+      <line x1="-1300" y1="-600" x2="-1300" y2="600"/>
+      <line x1="-1700" y1="-600" x2="-1700" y2="600"/>
+      <line x1="-2100" y1="-600" x2="-2100" y2="600"/>
+      <line x1="-2500" y1="-600" x2="-2500" y2="600"/>
     </g>
 
   </g>
+
+  <!-- 링 -->
+  <circle cx="0" cy="0" r="772" stroke="black" stroke-width="18" fill="none"/>
+  <circle cx="0" cy="0" r="1545" stroke="black" stroke-width="18" fill="none"/>
+  <circle cx="0" cy="0" r="2317" stroke="black" stroke-width="18" fill="none"/>
+
+  <!-- 외곽 -->
+  <circle cx="0" cy="0" r="3089" stroke="black" stroke-width="28" fill="none"/>
+
+  <!-- 방사 -->
+  <g stroke="black" stroke-width="12">
+    <script><![CDATA[
+      const g = document.currentScript.parentNode;
+      for(let i=0;i<16;i++){
+        const a = i * Math.PI * 2 / 16;
+        const x = Math.cos(a) * 3089;
+        const y = Math.sin(a) * 3089;
+
+        let line = document.createElementNS("http://www.w3.org/2000/svg","line");
+        line.setAttribute("x1",0);
+        line.setAttribute("y1",0);
+        line.setAttribute("x2",x);
+        line.setAttribute("y2",y);
+        g.appendChild(line);
+      }
+    ]]></script>
+  </g>
+
+</g>
 </svg>
 
 <script>
 const svg=document.getElementById("map");
 const vp=document.getElementById("viewport");
 
-let scale=1;
-let origin={x:0,y:0};
-
-// 마우스 드래그
+let scale=1, origin={x:0,y:0};
 let dragging=false,start={x:0,y:0};
 
-svg.onmousedown=e=>{
-  dragging=true;
-  start={x:e.clientX,y:e.clientY};
-};
+// 마우스
+svg.onmousedown=e=>{dragging=true;start={x:e.clientX,y:e.clientY}};
 svg.onmouseup=()=>dragging=false;
 svg.onmousemove=e=>{
   if(!dragging)return;
@@ -100,14 +147,13 @@ svg.onmousemove=e=>{
   update();
 };
 
-// 휠 줌
 svg.onwheel=e=>{
   e.preventDefault();
   scale*=e.deltaY<0?1.1:0.9;
   update();
 };
 
-// 터치 (드래그 + 핀치)
+// 터치
 let prevDist=null;
 
 svg.ontouchstart=e=>{
@@ -118,17 +164,13 @@ svg.ontouchstart=e=>{
 
 svg.ontouchmove=e=>{
   if(e.touches.length===2){
-    const dx=e.touches[0].clientX-e.touches[1].clientX;
-    const dy=e.touches[0].clientY-e.touches[1].clientY;
-    const dist=Math.sqrt(dx*dx+dy*dy);
-
-    if(prevDist){
-      scale*=dist/prevDist;
-    }
+    let dx=e.touches[0].clientX-e.touches[1].clientX;
+    let dy=e.touches[0].clientY-e.touches[1].clientY;
+    let dist=Math.sqrt(dx*dx+dy*dy);
+    if(prevDist) scale*=dist/prevDist;
     prevDist=dist;
-  }
-  else if(e.touches.length===1){
-    const t=e.touches[0];
+  }else{
+    let t=e.touches[0];
     origin.x+=(t.clientX-start.x)/scale;
     origin.y+=(t.clientY-start.y)/scale;
     start={x:t.clientX,y:t.clientY};
@@ -136,9 +178,7 @@ svg.ontouchmove=e=>{
   update();
 };
 
-svg.ontouchend=()=>{
-  prevDist=null;
-};
+svg.ontouchend=()=>prevDist=null;
 
 function update(){
   vp.setAttribute("transform",
