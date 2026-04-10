@@ -12,7 +12,7 @@ svg{width:100vw;height:100vh;touch-action:none;}
 <svg id="map" viewBox="-3200 -3200 6400 6400">
 
 <defs>
-  <!-- 원 마스크 -->
+  <!-- 원 클리핑 -->
   <clipPath id="circleClip">
     <circle cx="0" cy="0" r="3089"/>
   </clipPath>
@@ -20,11 +20,11 @@ svg{width:100vw;height:100vh;touch-action:none;}
 
 <g id="viewport">
 
-  <!-- 격자 (절대 삭제 안함, 그냥 자름) -->
-  <g clip-path="url(#circleClip)" stroke="black" stroke-width="4">
+  <!-- 100m 격자 -->
+  <g clip-path="url(#circleClip)" stroke="black" stroke-width="3">
     <script><![CDATA[
       const grid = document.currentScript.parentNode;
-      const step = 200;
+      const step = 100; // 100m
 
       for(let x=-3200;x<=3200;x+=step){
         let l=document.createElementNS("http://www.w3.org/2000/svg","line");
@@ -46,7 +46,7 @@ svg{width:100vw;height:100vh;touch-action:none;}
     ]]></script>
   </g>
 
-  <!-- 링 -->
+  <!-- 링 (균등 간격) -->
   <circle cx="0" cy="0" r="772" stroke="black" stroke-width="18" fill="none"/>
   <circle cx="0" cy="0" r="1545" stroke="black" stroke-width="18" fill="none"/>
   <circle cx="0" cy="0" r="2317" stroke="black" stroke-width="18" fill="none"/>
@@ -54,7 +54,7 @@ svg{width:100vw;height:100vh;touch-action:none;}
   <!-- 외곽 -->
   <circle cx="0" cy="0" r="3089" stroke="black" stroke-width="28" fill="none"/>
 
-  <!-- 방사 -->
+  <!-- 방사 (16개) -->
   <g stroke="black" stroke-width="12">
     <script><![CDATA[
       const g = document.currentScript.parentNode;
@@ -68,7 +68,6 @@ svg{width:100vw;height:100vh;touch-action:none;}
         line.setAttribute("y1",0);
         line.setAttribute("x2",x);
         line.setAttribute("y2",y);
-
         g.appendChild(line);
       }
     ]]></script>
@@ -101,7 +100,7 @@ svg.onwheel=e=>{
   update();
 };
 
-// 터치
+// 터치 (핀치 포함)
 let prevDist=null;
 
 svg.ontouchstart=e=>{
