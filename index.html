@@ -12,7 +12,6 @@ svg{width:100vw;height:100vh;touch-action:none;}
 <svg id="map" viewBox="-3200 -3200 6400 6400">
 
 <defs>
-  <!-- 원 클리핑 -->
   <clipPath id="circleClip">
     <circle cx="0" cy="0" r="3089"/>
   </clipPath>
@@ -24,7 +23,7 @@ svg{width:100vw;height:100vh;touch-action:none;}
   <g clip-path="url(#circleClip)" stroke="black" stroke-width="3">
     <script><![CDATA[
       const grid = document.currentScript.parentNode;
-      const step = 100; // 100m
+      const step = 100;
 
       for(let x=-3200;x<=3200;x+=step){
         let l=document.createElementNS("http://www.w3.org/2000/svg","line");
@@ -46,28 +45,34 @@ svg{width:100vw;height:100vh;touch-action:none;}
     ]]></script>
   </g>
 
-  <!-- 링 (균등 간격) -->
+  <!-- 링 -->
   <circle cx="0" cy="0" r="772" stroke="black" stroke-width="18" fill="none"/>
   <circle cx="0" cy="0" r="1545" stroke="black" stroke-width="18" fill="none"/>
   <circle cx="0" cy="0" r="2317" stroke="black" stroke-width="18" fill="none"/>
-
-  <!-- 외곽 -->
   <circle cx="0" cy="0" r="3089" stroke="black" stroke-width="28" fill="none"/>
 
-  <!-- 방사 (16개) -->
+  <!-- 방사 (내부 제거됨: r=772부터 시작) -->
   <g stroke="black" stroke-width="12">
     <script><![CDATA[
       const g = document.currentScript.parentNode;
+
+      const rInner = 772;   // 여기 안쪽은 제거
+      const rOuter = 3089;
+
       for(let i=0;i<16;i++){
         const a = i * Math.PI * 2 / 16;
-        const x = Math.cos(a) * 3089;
-        const y = Math.sin(a) * 3089;
+
+        const x1 = Math.cos(a) * rInner;
+        const y1 = Math.sin(a) * rInner;
+
+        const x2 = Math.cos(a) * rOuter;
+        const y2 = Math.sin(a) * rOuter;
 
         let line = document.createElementNS("http://www.w3.org/2000/svg","line");
-        line.setAttribute("x1",0);
-        line.setAttribute("y1",0);
-        line.setAttribute("x2",x);
-        line.setAttribute("y2",y);
+        line.setAttribute("x1",x1);
+        line.setAttribute("y1",y1);
+        line.setAttribute("x2",x2);
+        line.setAttribute("y2",y2);
         g.appendChild(line);
       }
     ]]></script>
@@ -83,9 +88,9 @@ const vp=document.getElementById("viewport");
 let scale=1, origin={x:0,y:0};
 let dragging=false,start={x:0,y:0};
 
-// 마우스
 svg.onmousedown=e=>{dragging=true;start={x:e.clientX,y:e.clientY}};
 svg.onmouseup=()=>dragging=false;
+
 svg.onmousemove=e=>{
   if(!dragging)return;
   origin.x+=(e.clientX-start.x)/scale;
@@ -100,7 +105,6 @@ svg.onwheel=e=>{
   update();
 };
 
-// 터치 (핀치 포함)
 let prevDist=null;
 
 svg.ontouchstart=e=>{
