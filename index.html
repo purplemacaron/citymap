@@ -12,91 +12,38 @@ svg{width:100vw;height:100vh;touch-action:none;}
 <svg id="map" viewBox="-3200 -3200 6400 6400">
 
 <defs>
-  <!-- 30km² 원 -->
-  <clipPath id="clipCircle">
+  <!-- 원 마스크 -->
+  <clipPath id="circleClip">
     <circle cx="0" cy="0" r="3089"/>
-  </clipPath>
-
-  <!-- 항만 구역 (1번 / 9번) -->
-  <clipPath id="port1">
-    <path d="
-      M 0 0
-      L 3089 0
-      A 3089 3089 0 0 1 2855 1180
-      Z"/>
-  </clipPath>
-
-  <clipPath id="port9">
-    <path d="
-      M 0 0
-      L -3089 0
-      A 3089 3089 0 0 1 -2855 -1180
-      Z"/>
   </clipPath>
 </defs>
 
 <g id="viewport">
 
-  <!-- 격자 (쐐기 제거) -->
-  <g clip-path="url(#clipCircle)" stroke="black" stroke-width="4">
+  <!-- 격자 (절대 삭제 안함, 그냥 자름) -->
+  <g clip-path="url(#circleClip)" stroke="black" stroke-width="4">
     <script><![CDATA[
       const grid = document.currentScript.parentNode;
       const step = 200;
-      const minSize = 120;
 
-      for(let x=-3200;x<3200;x+=step){
-        for(let y=-3200;y<3200;y+=step){
+      for(let x=-3200;x<=3200;x+=step){
+        let l=document.createElementNS("http://www.w3.org/2000/svg","line");
+        l.setAttribute("x1",x);
+        l.setAttribute("y1",-3200);
+        l.setAttribute("x2",x);
+        l.setAttribute("y2",3200);
+        grid.appendChild(l);
+      }
 
-          const cx = x + step/2;
-          const cy = y + step/2;
-          const dist = Math.sqrt(cx*cx + cy*cy);
-
-          if(dist > 3089) continue;
-          if((3089 - dist) < minSize) continue;
-
-          let v = document.createElementNS("http://www.w3.org/2000/svg","line");
-          v.setAttribute("x1",x);
-          v.setAttribute("y1",y);
-          v.setAttribute("x2",x);
-          v.setAttribute("y2",y+step);
-          grid.appendChild(v);
-
-          let h = document.createElementNS("http://www.w3.org/2000/svg","line");
-          h.setAttribute("x1",x);
-          h.setAttribute("y1",y);
-          h.setAttribute("x2",x+step);
-          h.setAttribute("y2",y);
-          grid.appendChild(h);
-        }
+      for(let y=-3200;y<=3200;y+=step){
+        let l=document.createElementNS("http://www.w3.org/2000/svg","line");
+        l.setAttribute("x1",-3200);
+        l.setAttribute("y1",y);
+        l.setAttribute("x2",3200);
+        l.setAttribute("y2",y);
+        grid.appendChild(l);
       }
     ]]></script>
-  </g>
-
-  <!-- 항만시설 (격자 위에 덮음) -->
-  <g stroke="black" stroke-width="6">
-
-    <!-- 1번 구역 -->
-    <g clip-path="url(#port1)">
-      <rect x="0" y="-400" width="3089" height="800" fill="none"/>
-      <line x1="500" y1="-600" x2="500" y2="600"/>
-      <line x1="900" y1="-600" x2="900" y2="600"/>
-      <line x1="1300" y1="-600" x2="1300" y2="600"/>
-      <line x1="1700" y1="-600" x2="1700" y2="600"/>
-      <line x1="2100" y1="-600" x2="2100" y2="600"/>
-      <line x1="2500" y1="-600" x2="2500" y2="600"/>
-    </g>
-
-    <!-- 9번 구역 -->
-    <g clip-path="url(#port9)">
-      <rect x="-3089" y="-400" width="3089" height="800" fill="none"/>
-      <line x1="-500" y1="-600" x2="-500" y2="600"/>
-      <line x1="-900" y1="-600" x2="-900" y2="600"/>
-      <line x1="-1300" y1="-600" x2="-1300" y2="600"/>
-      <line x1="-1700" y1="-600" x2="-1700" y2="600"/>
-      <line x1="-2100" y1="-600" x2="-2100" y2="600"/>
-      <line x1="-2500" y1="-600" x2="-2500" y2="600"/>
-    </g>
-
   </g>
 
   <!-- 링 -->
@@ -121,6 +68,7 @@ svg{width:100vw;height:100vh;touch-action:none;}
         line.setAttribute("y1",0);
         line.setAttribute("x2",x);
         line.setAttribute("y2",y);
+
         g.appendChild(line);
       }
     ]]></script>
